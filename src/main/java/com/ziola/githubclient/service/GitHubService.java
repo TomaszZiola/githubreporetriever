@@ -45,7 +45,9 @@ public class GitHubService {
     private List<Branch> retrieveBranches(String username, String repoName) {
         return githubClient.getBranches(username, repoName)
                 .stream()
-                .map(githubBranch -> new Branch(githubBranch.name(), githubBranch.commit().sha()))
+                .map(githubBranch -> new Branch(
+                        githubBranch.name(),
+                        githubBranch.commit().sha()))
                 .toList();
     }
 }
