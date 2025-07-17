@@ -1,0 +1,40 @@
+package com.ziola.githubclient.client;
+
+import com.ziola.githubclient.dto.github.GithubRepository;
+import com.ziola.githubclient.dto.github.GithubBranch;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClient.Builder;
+
+import java.util.List;
+
+@Service
+public class GithubClient {
+
+    private final RestClient restClient;
+
+    public GithubClient(Builder restClientBuilder, @Value("${github.api.url}") String baseUrl) {
+        this.restClient = restClientBuilder
+                .baseUrl(baseUrl)
+                .defaultHeader("Accept", "application/vnd.github.v3+json")
+                .build();
+    }
+
+    public List<GithubRepository> getRepositories(String username) {
+        return restClient.get()
+                .uri("/users/{username}/repos", username)
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {
+                });
+    }
+
+    public List<GithubBranch> getBranches(String username, String repoName) {
+        return restClient.get()
+                .uri("/repos/{username}/{repoName}/branches", username, repoName)
+                .retrieve()
+                .body(new ParameterizedTypeReference<>() {
+                });
+    }
+}
