@@ -24,7 +24,7 @@ A simple Spring Boot application that consumes the GitHub REST API to retrieve n
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/github-client-api.git
+git clone https://github.com/TomaszZiola/githubreporetriever.git
 cd github-client-api
 ```
 2. Build and run the project
