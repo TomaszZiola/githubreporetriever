@@ -25,13 +25,13 @@ public class GitHubService {
                     .stream()
                     .filter(repo -> !repo.fork())
                     .toList();
-            return mapToApiResponse(username, nonForkedRepos);
+            return mapToRepositoriesWithBranches(username, nonForkedRepos);
         } catch (NotFound errorException) {
             throw new UserNotFoundException("User '" + username + "' not found");
         }
     }
 
-    private List<Repository> mapToApiResponse(String username, List<GithubRepository> nonForkedRepos) {
+    private List<Repository> mapToRepositoriesWithBranches(String username, List<GithubRepository> nonForkedRepos) {
         return nonForkedRepos
                 .stream()
                 .map(githubRepository -> new Repository(
