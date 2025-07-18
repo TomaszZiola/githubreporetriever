@@ -11,10 +11,10 @@ import org.springframework.web.client.HttpClientErrorException.NotFound;
 import java.util.List;
 
 @Service
-public class GitHubService {
+public class GithubService {
     private final GithubClient githubClient;
 
-    public GitHubService(GithubClient githubClient) {
+    public GithubService(GithubClient githubClient) {
         this.githubClient = githubClient;
     }
 
