@@ -25,7 +25,7 @@ A simple Spring Boot application that consumes the GitHub REST API to retrieve n
 
 ```bash
 git clone https://github.com/TomaszZiola/githubreporetriever.git
-cd github-client-api
+cd githubreporetriever
 ```
 2. Build and run the project
 
