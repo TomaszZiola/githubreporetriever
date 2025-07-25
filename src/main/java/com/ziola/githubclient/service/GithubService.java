@@ -7,9 +7,7 @@ import com.ziola.githubclient.dto.Repository;
 import com.ziola.githubclient.exception.UserNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException.NotFound;
-
 import java.util.List;
-
 import static java.util.stream.Collectors.toList;
 
 @Service

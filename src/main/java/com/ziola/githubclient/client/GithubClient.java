@@ -5,7 +5,6 @@ import com.ziola.githubclient.dto.Repository;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
-
 import java.util.List;
 
 @Service
