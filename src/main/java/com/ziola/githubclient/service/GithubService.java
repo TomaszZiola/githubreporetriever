@@ -33,7 +33,7 @@ public class GithubService {
 
     private List<Repository> mapToRepositoriesWithBranches(String username, List<GithubRepository> nonForkedRepos) {
         return nonForkedRepos
-                .stream()
+                .parallelStream()
                 .map(githubRepository -> new Repository(
                         githubRepository.name(),
                         githubRepository.owner().login(),
