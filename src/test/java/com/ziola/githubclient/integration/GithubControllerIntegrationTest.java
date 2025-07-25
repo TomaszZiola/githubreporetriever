@@ -1,6 +1,5 @@
 package com.ziola.githubclient.integration;
 
-import com.ziola.githubclient.GithubClientApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureMockRestServiceServer;
@@ -16,9 +15,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(classes = GithubClientApplication.class)
 @AutoConfigureMockMvc
 @AutoConfigureMockRestServiceServer
+@SpringBootTest
 class GithubControllerIntegrationTest extends TestData {
 
     @Autowired
