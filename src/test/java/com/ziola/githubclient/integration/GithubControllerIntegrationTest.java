@@ -1,51 +1,54 @@
 package com.ziola.githubclient.integration;
 
-import com.ziola.githubclient.dto.response.Branch;
-import com.ziola.githubclient.dto.response.Repository;
+import com.ziola.githubclient.GithubClientApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureMockRestServiceServer;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.http.HttpStatus.OK;
-
-@SpringBootTest(webEnvironment = RANDOM_PORT)
-public class GithubControllerIntegrationTest {
+@SpringBootTest(classes = GithubClientApplication.class)
+@AutoConfigureMockMvc
+@AutoConfigureMockRestServiceServer
+class GithubControllerIntegrationTest extends TestData {
 
     @Autowired
-    private TestRestTemplate restTemplate;
+    private MockMvc mockMvc;
+
+    @Autowired
+    private MockRestServiceServer mockServer;
 
     @Test
-    void shouldReturnRepositoriesWithBranches() {
-        // Given
+    void shouldReturnRepositoriesAndBranchesForUser() throws Exception {
+        // given
         String username = "octocat";
+        String repoName = "git-consortium";
+        String branchName = "master";
+        String sha = "b33a9c7c02ad93f621fa38f0e9fc9e867e12fa0e";
 
-        // When
-        ResponseEntity<Repository[]> response = restTemplate.getForEntity(
-                "/{username}", Repository[].class, username);
+        mockServer.expect(requestTo("https://api.github.com/users/" + username + "/repos"))
+                .andRespond(withSuccess(REPOS_JSON, APPLICATION_JSON));
 
-        // Then
-        assertThat(response.getStatusCode()).isEqualTo(OK);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody()).isNotEmpty();
+        mockServer.expect(requestTo("https://api.github.com/repos/" + username + "/" + repoName + "/branches"))
+                .andRespond(withSuccess(BRANCHES_JSON, APPLICATION_JSON));
 
-        Repository[] repositories = response.getBody();
-
-        assertNotNull(repositories);
-        for (Repository repo : repositories) {
-            assertThat(repo.name()).isNotBlank();
-            assertThat(repo.ownerLogin()).isEqualTo(username);
-            assertThat(repo.branches()).isNotNull();
-
-            for (Branch branch : repo.branches()) {
-                assertThat(branch.name()).isNotBlank();
-                assertThat(branch.lastCommitSha()).matches("^[a-f0-9]{40}$");
-            }
-        }
+        // when & then
+        mockMvc.perform(get("/{username}", username))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].name").value(repoName))
+                .andExpect(jsonPath("$[0].ownerLogin").value(username))
+                .andExpect(jsonPath("$[0].branches.length()").value(1))
+                .andExpect(jsonPath("$[0].branches[0].name").value(branchName))
+                .andExpect(jsonPath("$[0].branches[0].lastCommitSha").value(sha));
     }
 }
