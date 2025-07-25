@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClient.Builder;
 
-import static com.ziola.githubclient.GithubConstants.ACCEPT;
-import static com.ziola.githubclient.GithubConstants.GITHUB_API_ACCEPT_HEADER;
+import static com.ziola.githubclient.constants.Constants.ACCEPT;
+import static com.ziola.githubclient.constants.Constants.GITHUB_API_ACCEPT_HEADER;
 
 @Configuration
 public class GithubClientConfig {
