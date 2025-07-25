@@ -1,6 +1,6 @@
 package com.ziola.githubclient.controller;
 
-import com.ziola.githubclient.dto.response.Repository;
+import com.ziola.githubclient.api.dto.GithubRepositoryResponse;
 import com.ziola.githubclient.service.GithubService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,7 +17,7 @@ public class GithubController {
     }
 
     @GetMapping("/{username}")
-    public List<Repository> getRepositoriesWithBranches(@PathVariable String username) {
+    public List<GithubRepositoryResponse> getRepositoriesWithBranches(@PathVariable String username) {
         return githubService.retrieveRepositories(username);
     }
 }

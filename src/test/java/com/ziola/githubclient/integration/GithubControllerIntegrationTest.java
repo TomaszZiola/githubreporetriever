@@ -45,7 +45,7 @@ class GithubControllerIntegrationTest extends TestData {
         mockMvc.perform(get("/{username}", username))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].name").value(repoName))
+                .andExpect(jsonPath("$[0].repositoryName").value(repoName))
                 .andExpect(jsonPath("$[0].ownerLogin").value(username))
                 .andExpect(jsonPath("$[0].branches.length()").value(1))
                 .andExpect(jsonPath("$[0].branches[0].name").value(branchName))

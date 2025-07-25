@@ -1,14 +1,16 @@
 package com.ziola.githubclient.service;
 
+import com.ziola.githubclient.api.dto.BranchResponse;
+import com.ziola.githubclient.api.dto.GithubRepositoryResponse;
 import com.ziola.githubclient.client.GithubClient;
-import com.ziola.githubclient.dto.github.GithubRepository;
-import com.ziola.githubclient.dto.response.Branch;
-import com.ziola.githubclient.dto.response.Repository;
+import com.ziola.githubclient.dto.Repository;
 import com.ziola.githubclient.exception.UserNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException.NotFound;
 
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class GithubService {
@@ -18,36 +20,23 @@ public class GithubService {
         this.githubClient = githubClient;
     }
 
-
-    public List<Repository> retrieveRepositories(String username) {
+    public List<GithubRepositoryResponse> retrieveRepositories(String username) {
         try {
-            List<GithubRepository> nonForkedRepos = githubClient.getRepositories(username)
+            return githubClient.getRepositories(username)
                     .stream()
                     .filter(repo -> !repo.fork())
-                    .toList();
-            return mapToRepositoriesWithBranches(username, nonForkedRepos);
+                    .map(repo -> mapToGithubRepositoryResponse(username, repo))
+                    .collect(toList());
         } catch (NotFound errorException) {
             throw new UserNotFoundException("User '" + username + "' not found");
         }
     }
 
-    private List<Repository> mapToRepositoriesWithBranches(String username, List<GithubRepository> nonForkedRepos) {
-        return nonForkedRepos
-                .parallelStream()
-                .map(githubRepository -> new Repository(
-                        githubRepository.name(),
-                        githubRepository.owner().login(),
-                        retrieveBranches(username, githubRepository.name())
-                ))
-                .toList();
-    }
-
-    private List<Branch> retrieveBranches(String username, String repoName) {
-        return githubClient.getBranches(username, repoName)
+    private GithubRepositoryResponse mapToGithubRepositoryResponse(String username, Repository repo) {
+        List<BranchResponse> branchResponses = githubClient.getBranches(username, repo.name())
                 .stream()
-                .map(githubBranch -> new Branch(
-                        githubBranch.name(),
-                        githubBranch.commit().sha()))
-                .toList();
+                .map(branch -> new BranchResponse(branch.name(), branch.commit().sha()))
+                .collect(toList());
+        return new GithubRepositoryResponse(repo.name(), repo.owner().login(), branchResponses);
     }
 }
