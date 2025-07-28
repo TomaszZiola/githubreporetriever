@@ -24,7 +24,7 @@ public class GithubService {
                     .stream()
                     .filter(repo -> !repo.fork())
                     .map(repo -> mapToGithubRepositoryResponse(username, repo))
-                    .collect(toList());
+                    .toList();
         } catch (NotFound errorException) {
             throw new UserNotFoundException("User '" + username + "' not found");
         }
@@ -34,7 +34,7 @@ public class GithubService {
         List<BranchResponse> branchResponses = githubClient.getBranches(username, repo.name())
                 .stream()
                 .map(branch -> new BranchResponse(branch.name(), branch.commit().sha()))
-                .collect(toList());
+                .toList();
         return new GithubRepositoryResponse(repo.name(), repo.owner().login(), branchResponses);
     }
 }
