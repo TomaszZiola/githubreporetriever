@@ -1,65 +1,59 @@
 package com.ziola.githubclient.integration;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ziola.githubclient.api.dto.GithubRepositoryResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureMockRestServiceServer;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.wiremock.spring.ConfigureWireMock;
+import org.wiremock.spring.EnableWireMock;
 
-import java.util.List;
-
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.ziola.githubclient.integration.TestData.BRANCHES_JSON;
 import static com.ziola.githubclient.integration.TestData.REPOS_JSON;
 import static com.ziola.githubclient.integration.TestData.REPO_NAME;
 import static com.ziola.githubclient.integration.TestData.USERNAME;
 import static com.ziola.githubclient.integration.TestData.createExpectedResponse;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@AutoConfigureMockMvc
-@AutoConfigureMockRestServiceServer
-@SpringBootTest
+@AutoConfigureWebTestClient
+@EnableWireMock(
+        @ConfigureWireMock(
+                baseUrlProperties = {"github.api.url"}
+        )
+)
+@SpringBootTest(webEnvironment = RANDOM_PORT)
 class GithubControllerIntegrationTest {
-
     @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private MockRestServiceServer mockServer;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private WebTestClient webTestClient;
 
     @Test
-    void shouldReturnRepositoriesAndBranchesForUser() throws Exception {
+    void shouldReturnRepositoriesAndBranchesForUser() {
         // given
         var expectedResponse = createExpectedResponse();
 
-        mockServer.expect(requestTo("https://api.github.com/users/" + USERNAME + "/repos"))
-                .andRespond(withSuccess(REPOS_JSON, APPLICATION_JSON));
+        stubFor(get(urlEqualTo("/users/" + USERNAME + "/repos"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(REPOS_JSON)));
 
-        mockServer.expect(requestTo("https://api.github.com/repos/" + USERNAME + "/" + REPO_NAME + "/branches"))
-                .andRespond(withSuccess(BRANCHES_JSON, APPLICATION_JSON));
+        stubFor(get(urlEqualTo("/repos/" + USERNAME + "/" + REPO_NAME + "/branches"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(BRANCHES_JSON)));
 
-        // when
-        var result = mockMvc.perform(get("/github/users/" + USERNAME)).andExpect(status().isOk()).andReturn();
-
-
-        // then
-        var jsonResponse = result.getResponse().getContentAsString();
-
-        var actualResponse = objectMapper.readValue(jsonResponse, new TypeReference<List<GithubRepositoryResponse>>() {
-        });
-
-        assertThat(actualResponse).isEqualTo(expectedResponse);
+        // when & then
+        webTestClient.get()
+                .uri("/github/users/" + USERNAME)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(APPLICATION_JSON)
+                .expectBodyList(GithubRepositoryResponse.class)
+                .isEqualTo(expectedResponse);
     }
 }
