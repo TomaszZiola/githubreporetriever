@@ -33,7 +33,4 @@ cd githubreporetriever
 
 ## 🌐 API Usage
 
-Access the API at ```http://localhost:8080/{username}```
-
-
-
+Access the API at ```http://localhost:8080/github/users/{username}```
