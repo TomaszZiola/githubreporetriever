@@ -1,6 +1,28 @@
 package com.ziola.githubclient.integration;
 
+import com.ziola.githubclient.api.dto.BranchResponse;
+import com.ziola.githubclient.api.dto.GithubRepositoryResponse;
+
+import java.util.List;
+
+import static java.util.List.of;
+
 public class TestData {
+
+    public static final String USERNAME = "octocat";
+    public static final String REPO_NAME = "git-consortium";
+    public static final String BRANCH_NAME = "master";
+    public static final String SHA = "b33a9c7c02ad93f621fa38f0e9fc9e867e12fa0e";
+
+    public static List<GithubRepositoryResponse> createExpectedResponse() {
+        var branch = createExpectedBranch();
+        var repo = new GithubRepositoryResponse(REPO_NAME, USERNAME, of(branch));
+        return of(repo);
+    }
+
+    private static BranchResponse createExpectedBranch() {
+        return new BranchResponse(BRANCH_NAME, SHA);
+    }
 
     public static final String REPOS_JSON = """
             [

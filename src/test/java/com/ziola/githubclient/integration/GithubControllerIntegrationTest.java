@@ -1,5 +1,8 @@
 package com.ziola.githubclient.integration;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ziola.githubclient.api.dto.GithubRepositoryResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureMockRestServiceServer;
@@ -8,11 +11,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
@@ -26,28 +31,30 @@ class GithubControllerIntegrationTest extends TestData {
     @Autowired
     private MockRestServiceServer mockServer;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Test
     void shouldReturnRepositoriesAndBranchesForUser() throws Exception {
         // given
-        String username = "octocat";
-        String repoName = "git-consortium";
-        String branchName = "master";
-        String sha = "b33a9c7c02ad93f621fa38f0e9fc9e867e12fa0e";
+        var expectedResponse = createExpectedResponse();
 
-        mockServer.expect(requestTo("https://api.github.com/users/" + username + "/repos"))
+        mockServer.expect(requestTo("https://api.github.com/users/" + USERNAME + "/repos"))
                 .andRespond(withSuccess(REPOS_JSON, APPLICATION_JSON));
 
-        mockServer.expect(requestTo("https://api.github.com/repos/" + username + "/" + repoName + "/branches"))
+        mockServer.expect(requestTo("https://api.github.com/repos/" + USERNAME + "/" + REPO_NAME + "/branches"))
                 .andRespond(withSuccess(BRANCHES_JSON, APPLICATION_JSON));
 
-        // when & then
-        mockMvc.perform(get("/{username}", username))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].repositoryName").value(repoName))
-                .andExpect(jsonPath("$[0].ownerLogin").value(username))
-                .andExpect(jsonPath("$[0].branches.length()").value(1))
-                .andExpect(jsonPath("$[0].branches[0].name").value(branchName))
-                .andExpect(jsonPath("$[0].branches[0].lastCommitSha").value(sha));
+        // when
+        var result = mockMvc.perform(get("/github/users/" + USERNAME)).andExpect(status().isOk()).andReturn();
+
+
+        // then
+        var jsonResponse = result.getResponse().getContentAsString();
+
+        var actualResponse = objectMapper.readValue(jsonResponse, new TypeReference<List<GithubRepositoryResponse>>() {
+        });
+
+        assertThat(actualResponse).isEqualTo(expectedResponse);
     }
 }
