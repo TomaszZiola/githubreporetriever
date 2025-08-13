@@ -19,7 +19,9 @@ import static com.ziola.githubclient.integration.TestData.REPO_NAME;
 import static com.ziola.githubclient.integration.TestData.USERNAME;
 import static com.ziola.githubclient.integration.TestData.createExpectedResponse;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @AutoConfigureWebTestClient
 @EnableWireMock(
@@ -39,12 +41,12 @@ class GithubControllerIntegrationTest {
 
         stubFor(get(urlEqualTo("/users/" + USERNAME + "/repos"))
                 .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                         .withBody(REPOS_JSON)));
 
         stubFor(get(urlEqualTo("/repos/" + USERNAME + "/" + REPO_NAME + "/branches"))
                 .willReturn(aResponse()
-                        .withHeader("Content-Type", "application/json")
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                         .withBody(BRANCHES_JSON)));
 
         // when & then
