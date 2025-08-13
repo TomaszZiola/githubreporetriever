@@ -13,6 +13,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static com.ziola.githubclient.integration.TestData.BRANCHES_JSON;
+import static com.ziola.githubclient.integration.TestData.REPOS_JSON;
+import static com.ziola.githubclient.integration.TestData.REPO_NAME;
+import static com.ziola.githubclient.integration.TestData.USERNAME;
+import static com.ziola.githubclient.integration.TestData.createExpectedResponse;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -23,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @AutoConfigureMockRestServiceServer
 @SpringBootTest
-class GithubControllerIntegrationTest extends TestData {
+class GithubControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;

@@ -7,7 +7,11 @@ import java.util.List;
 
 import static java.util.List.of;
 
-public class TestData {
+public final class TestData {
+
+    private TestData() {
+        throw new IllegalStateException("Utility class should not be instantiated");
+    }
 
     public static final String USERNAME = "octocat";
     public static final String REPO_NAME = "git-consortium";
