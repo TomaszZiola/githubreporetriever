@@ -9,19 +9,12 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.wiremock.spring.ConfigureWireMock;
 import org.wiremock.spring.EnableWireMock;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.ziola.githubclient.integration.TestData.BRANCHES_JSON;
-import static com.ziola.githubclient.integration.TestData.REPOS_JSON;
-import static com.ziola.githubclient.integration.TestData.REPO_NAME;
-import static com.ziola.githubclient.integration.TestData.USERNAME;
-import static com.ziola.githubclient.integration.TestData.createExpectedResponse;
+import static com.ziola.githubclient.utils.ApiPaths.getGithubUserPath;
+import static com.ziola.githubclient.utils.TestConstants.USERNAME;
+import static com.ziola.githubclient.utils.ApiStubs.stubExternalApis;
+import static com.ziola.githubclient.utils.TestDtoFactory.createExpectedResponse;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @AutoConfigureWebTestClient
 @EnableWireMock(
@@ -39,19 +32,11 @@ class GithubControllerIntegrationTest {
         // given
         var expectedResponse = createExpectedResponse();
 
-        stubFor(get(urlEqualTo("/users/" + USERNAME + "/repos"))
-                .willReturn(aResponse()
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                        .withBody(REPOS_JSON)));
-
-        stubFor(get(urlEqualTo("/repos/" + USERNAME + "/" + REPO_NAME + "/branches"))
-                .willReturn(aResponse()
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                        .withBody(BRANCHES_JSON)));
+        stubExternalApis();
 
         // when & then
         webTestClient.get()
-                .uri("/github/users/" + USERNAME)
+                .uri(getGithubUserPath(USERNAME))
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(APPLICATION_JSON)
