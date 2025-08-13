@@ -25,7 +25,7 @@ public final class ApiStubs {
     private static final String REPOS_OCTOCAT_RESPONSE_FILE = "wiremock/repos-octocat.json";
     private static final String BRANCHES_CONSORTIUM_RESPONSE_FILE = "wiremock/branches-consortium.json";
 
-    public static String fromFile(String path) {
+    private static String fromFile(String path) {
         try {
             var resource = new ClassPathResource(path);
             return StreamUtils.copyToString(resource.getInputStream(), UTF_8);
