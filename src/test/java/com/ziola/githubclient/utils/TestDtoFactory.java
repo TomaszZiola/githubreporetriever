@@ -12,7 +12,7 @@ import static com.ziola.githubclient.utils.TestConstants.USERNAME;
 import static java.util.List.of;
 
 public final class TestDtoFactory {
-    public TestDtoFactory() {
+    private TestDtoFactory() {
         throw new IllegalStateException("Utility class should not be instantiated");
     }
 

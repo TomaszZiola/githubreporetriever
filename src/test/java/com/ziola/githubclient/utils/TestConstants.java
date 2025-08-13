@@ -1,7 +1,7 @@
 package com.ziola.githubclient.utils;
 
 public final class TestConstants {
-    public TestConstants() {
+    private TestConstants() {
         throw new IllegalStateException("Utility class should not be instantiated");
     }
 
